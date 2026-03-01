@@ -8,7 +8,7 @@ The challenge will involve an image that will look something like the following:
 
 ![Example image](images/example_image_annotated.png)
 
-This image will be generate by the provided metalg_challenge.pyc API.
+This image will be generate by the provided [metalg_challenge_compiled.pyc](metalg_challenge_compiled.pyc) API. Instructions for how to use this API are given below.
 
 ### Objectives
 
@@ -18,6 +18,7 @@ This image will be generate by the provided metalg_challenge.pyc API.
 4. Present the results in the following format:
     - The image with the center position and fringe rings marked with colors (see below for example)
     - The graph of the fringe distribution (X=fringe number, Y=fringe distance from center)
+    - Include the **seed** that was used for these specific results, so that it can be confirmed (see below for details on the randomized seed)
 
 You are also expected to demonstrate:
  - Clear code documentation
@@ -25,7 +26,7 @@ You are also expected to demonstrate:
 
 ### Challenge Levels
 
-The API allows for customization of the difficulty of the challenge. The noise and the contaminations can be completely turned off. Therefore, there are 3 challenge levels that can be attempted (plus a Level 0 prerequisite).
+The API allows for customization of the difficulty of the challenge. The noise and the contaminations can be completely turned off. Therefore, there are 3 challenge levels that can be attempted (plus a Level 0 prerequisite). Levels 2 and 3 are considered **stretch goals** for this challenge.
 
 - Level 0: (Documentation) Outline plan of approach to solving the problem
     - Ideas to try
@@ -37,10 +38,10 @@ The API allows for customization of the difficulty of the challenge. The noise a
 
 ### Tips
 
-- Start by querying the image generation multiple times to get a gauge for how the images vary based on the randomized parameters
-- Select a single seed and develop the first-draft algorithm based on that image
-- Start with easy challenge level (no noise/contaminations) for first-draft, and progress from there.
-- Test periodically with different images and noise-ON to test how robust the algorithm is to different imaging conditions
+- Start with **Level 1** challenge (no noise/contaminations) first, and progress from there once it has been completed.
+- Start by querying the image generation multiple times to get a gauge for how the images vary based on the randomized parameters.
+- Select a single seed and develop the first-draft algorithm based on that image.
+- Test periodically with different images and noise-ON to test how robust the algorithm is to different imaging conditions.
 
 ### Example Solution Image
 
