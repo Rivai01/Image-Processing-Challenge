@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-import time
+from scipy.signal import argrelmin
 
 class CircleFinder:
     """Class to find the center and concentric circular rings of images generated 
@@ -59,6 +59,21 @@ class CircleFinder:
         """
         mask = np.abs(self.map - radius) <= width / 2
         return self.img[mask]
+    
+    def get_circles(self):
+        try:
+            return self.radii 
+        except AttributeError:
+            self.radii = argrelmin(self.avg, order=5)[0]
+            return self.radii
+    
+    def marked_img(self):
+        new_img = cv.cvtColor(self.img, cv.COLOR_GRAY2BGR)
+        radii = self.get_circles()
+        for radius in radii:
+            cv.circle(new_img, self.center, radius, (0, 255, 0), 3)
+        cv.circle(new_img, self.center, 10, (255, 0, 0), -1)
+        return new_img
 
     def _init_radial_profile(self):
         """
