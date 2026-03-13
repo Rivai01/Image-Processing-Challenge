@@ -1,0 +1,43 @@
+Plan to get started:
+
+    - Read OpenCV docs to get an idea of how the library works (https://docs.opencv.org/4.x/d6/d00/tutorial_py_root.html)
+
+    - Try to find ways to detect points and circles
+
+    - Will also need to use a regression to find a functional form for the circle spacing
+
+    - 
+
+Observations:
+
+    - Detecting points seems like the obvious choice to find the center, especially in an image
+    with no contamination or noise. However, upon adding contamination like in the example images, it seems
+    like this could become faulty - a lot of things start to look like center points. So, I want to make sure that
+    I'm looking for ways to detect the surrounding circles independently as well. Preliminary methods from looking
+    at the OpenCV docs appear to include the Hough Transform, I will look into this more.
+
+    - Perhaps a good way to approach the detection of the center would be to find all candidate locations within the image,
+    then rank them using some criterion based on  their symmetry, darkness, etc.
+
+Intermediate results:
+    - Hough circle transform doesn't yield immediate results, it seems like this is likely to be 
+    due to the fact that circles are cut off at the edges. Perhaps this could be circumvented by mirroring 
+    the image at its edges?
+    Setting the threshold parameters at 31, 31 does seem to at least find the center fairly well, but I'm sure 
+    there are better methods.
+
+    - I tried Canny edge detection, but this also seems not to apply that well to this situation, since 
+    the circles are so blurry
+
+    - The image has very clear oscillatory behavior, so perhaps taking a (polar) Fourier transform will be helpful. 
+    It isn't exactly periodic, but finding the frequencies involved could be helpful - and even if I don't directly 
+    end up using them for detection, they could be a good tool for verifying results.
+
+    - Applying Gaussian sharpening filters does a good job of removing the blurriness around the rings
+    
+    - Finding contours of constant pixel values works extremely well
+    
+New plan:
+    - Find brightest area in order to locate center
+    
+    - Determine radial brightness profile and find local minima
