@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from circlefinder import CircleFinder
 
 if __name__ == "__main__":
-    img, params = generate_image(n_contam=0, noise_mag=0)
+    img, params = generate_image(n_contam=0, noise_mag=0, seed=1)
     finder = CircleFinder(img)
     fig, ax = plt.subplots(1,2)
     ax[0].plot(finder.get_avg(), label='average')

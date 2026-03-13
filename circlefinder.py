@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import time
 
 class CircleFinder:
     """Class to find the center and concentric circular rings of images generated 
@@ -9,11 +10,12 @@ class CircleFinder:
         """
         Initialize a`CircleFinder` object.
 
-        :param img: the image to be analyzed
+        :param img: the grayscale image to be analyzed
         """
+        if img.ndim != 2:
+            raise ValueError("Expected img to be a grayscale image!")
         self.img = img                      # set image
         self.center = self.get_center()     # find the image's center
-        self._init_dist_map()               # initialize distance map
         self._init_radial_profile()         # find radial patterns
     
     def get_center(self):
@@ -57,31 +59,28 @@ class CircleFinder:
         """
         mask = np.abs(self.map - radius) <= width / 2
         return self.img[mask]
-    
-    def _init_dist_map(self):
-        """
-        Create and store a radial distance map over the image, centered at ``self.center``.
-        """
-        h, w = self.img.shape[:2]
-        cx, cy = self.center
-
-        y, x = np.ogrid[:h, :w]
-        xdist = x - cx
-        ydist = y - cy
-        self.map = np.sqrt(xdist * xdist + ydist * ydist)
 
     def _init_radial_profile(self):
         """
         Create and store the average and standard deviation of all pixel values at each radius.
         """
-        radius = 0
-        avg = []
-        stdev = []
-        while True:
-            ring = self.get_ring_pixels(radius, 1)
-            if len(ring) == 0:
-                break
-            avg.append(np.mean(ring))
-            stdev.append(np.std(ring))
-            radius += 1
-        self.avg, self.stdev =  np.array(avg), np.array(stdev)
+        h, w = self.img.shape
+        y, x = np.ogrid[:h, :w]
+        cx, cy = self.center
+        xdist = x - cx
+        ydist = y - cy
+        # radii in pixels
+        r = np.sqrt(xdist * xdist + ydist * ydist).astype(np.int32)
+
+        r_flat = r.ravel()
+        img_flat = self.img.ravel()
+        _, inv, counts = np.unique(r_flat, return_inverse=True, return_counts=True)
+        # sum of values per radius
+        sum_vals = np.bincount(inv, weights=img_flat)
+        # sum of squares per radius
+        sum_sq = np.bincount(inv, weights=np.square(img_flat))
+        avg = sum_vals / counts
+        stdev = np.sqrt(sum_sq / counts - np.square(avg))
+        
+        self.avg = avg
+        self.stdev = stdev
