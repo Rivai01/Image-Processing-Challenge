@@ -8,7 +8,7 @@ class CircleFinder:
 
     def __init__(self, img):
         """
-        Initialize a`CircleFinder` object.
+        Initializes a`CircleFinder` object.
 
         :param img: the grayscale image to be analyzed
         """
@@ -36,7 +36,7 @@ class CircleFinder:
     
     def get_avg(self):
         """
-        Return an array containing the average pixel values at each radius.
+        Returns an array containing the average pixel values at each radius.
         
         ``self.get_avg()[i]`` is the average of the values at a distance of `i` pixels from the center.
         """
@@ -44,7 +44,7 @@ class CircleFinder:
     
     def get_stdev(self):
         """
-        Return an array containing the standard deviation of the pixel values at each radius.
+        Returns an array containing the standard deviation of the pixel values at each radius.
         
         ``self.get_stdev()[i]`` is the standard deviation of the values at a distance of `i` pixels from the center.
         """
@@ -52,7 +52,7 @@ class CircleFinder:
 
     def get_ring_pixels(self, radius, width=1):
         """
-        Return a 1D array containing the pixels at radius ``radius`` from ``self.center``.
+        Returns a 1D array containing the pixels at radius ``radius`` from ``self.center``.
 
         :param radius: The (major) radius at which to select pixels
         :param width: The minor radius of the annulus from which to select pixels around ``radius``
@@ -61,13 +61,15 @@ class CircleFinder:
         return self.img[mask]
     
     def get_circles(self):
+        """Returns an array containing the radii (in pixels) of the detected circles."""
         try:
             return self.radii 
         except AttributeError:
-            self.radii = argrelmin(self.avg, order=5)[0]
+            self.radii = argrelmin(self.avg, order=20)[0]
             return self.radii
     
     def marked_img(self):
+        """Returns a color image with the center and concentric circles marked."""
         new_img = cv.cvtColor(self.img, cv.COLOR_GRAY2BGR)
         radii = self.get_circles()
         for radius in radii:
@@ -77,7 +79,7 @@ class CircleFinder:
 
     def _init_radial_profile(self):
         """
-        Create and store the average and standard deviation of all pixel values at each radius.
+        Creates and stores the average and standard deviation of all pixel values at each radius.
         """
         h, w = self.img.shape
         y, x = np.ogrid[:h, :w]
@@ -95,7 +97,7 @@ class CircleFinder:
         # sum of squares per radius
         sum_sq = np.bincount(inv, weights=np.square(img_flat))
         avg = sum_vals / counts
-        stdev = np.sqrt(sum_sq / counts - np.square(avg))
+        stdev = np.sqrt(np.maximum(0.0, sum_sq / counts - np.square(avg)))
         
         self.avg = avg
         self.stdev = stdev
