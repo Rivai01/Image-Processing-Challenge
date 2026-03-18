@@ -27,8 +27,10 @@ class CircleFinder:
         """
         try:                    # check if the center has already been initialized
             return self.center
-        except AttributeError:  # need to initialize the center
-            return cv.minMaxLoc(self.img)[3]
+        except AttributeError:  # initialize the center
+            # Take median blur to counteract blotchy contamination
+            dst = cv.medianBlur(self.img, 39)
+            return cv.minMaxLoc(dst)[3]
         
     def get_img(self):
         """Returns the image being analyzed."""
@@ -49,6 +51,15 @@ class CircleFinder:
         ``self.get_stdev()[i]`` is the standard deviation of the values at a distance of `i` pixels from the center.
         """
         return self.stdev
+    
+    def get_avg_rem_outliers(self):
+        """
+        Returns an array containing the average pixel values at each radius, with outliers removed.
+        
+        ``self.get_avg_rem_outliers()[i]`` is the average of the values at a distance of `i` pixels from the center.
+        """
+        return self.avg_rem_outliers
+    
 
     def get_ring_pixels(self, radius, width=1):
         """
@@ -65,7 +76,7 @@ class CircleFinder:
         try:
             return self.radii 
         except AttributeError:
-            self.radii = argrelmin(self.avg, order=20)[0]
+            self.radii = argrelmin(self.avg_rem_outliers, order=20)[0]
             return self.radii
     
     def marked_img(self):
@@ -90,7 +101,7 @@ class CircleFinder:
         r = np.sqrt(xdist * xdist + ydist * ydist).astype(np.int32)
 
         r_flat = r.ravel()
-        img_flat = self.img.ravel()
+        img_flat = self.img.ravel().astype(np.int32)
         _, inv, counts = np.unique(r_flat, return_inverse=True, return_counts=True)
         # sum of values per radius
         sum_vals = np.bincount(inv, weights=img_flat)
@@ -98,6 +109,15 @@ class CircleFinder:
         sum_sq = np.bincount(inv, weights=np.square(img_flat))
         avg = sum_vals / counts
         stdev = np.sqrt(np.maximum(0.0, sum_sq / counts - np.square(avg)))
-        
+
+        # compute average without outliers (to filter out contamination)
+        dev = np.abs(img_flat - avg[inv])
+        mask = dev < 2 * stdev[inv]
+        sum_vals_noout = np.bincount(inv[mask], weights=img_flat[mask], minlength=len(counts))
+        counts_noout = np.bincount(inv[mask], minlength=len(counts))
+        avg_noout = np.divide(sum_vals_noout, counts_noout, where=counts_noout > 0)
+
         self.avg = avg
         self.stdev = stdev
+        self.avg_rem_outliers = avg_noout
+
