@@ -1,3 +1,11 @@
+"""
+Older file for directly running detection code.
+
+Running ``find_circles.py`` from the command line is recommended for ease of use.
+
+By Levi Hauser, 20-March-2026
+"""
+
 from metalg_challenge_compiled import generate_image # type: ignore
 import matplotlib.pyplot as plt
 from circlefinder import CircleFinder
@@ -22,10 +30,10 @@ if __name__ == "__main__":
     
     marked_img = finder.marked_img()
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
-    ax[0].imshow(cv.cvtColor(img, cv.COLOR_GRAY2BGR), cmap='gray')
+    ax[0].imshow(cv.cvtColor(img, cv.COLOR_GRAY2RGB))
     ax[0].set_title('Raw image')
 
-    ax[1].imshow(marked_img, cmap='gray')
+    ax[1].imshow(cv.cvtColor(marked_img, cv.COLOR_BGR2RGB))
     ax[1].set_title('Annotated image')
 
     ax[2].plot(circles, 'o', label='Detected')
