@@ -30,7 +30,11 @@ class CircleFinder:
         except AttributeError:  # initialize the center
             # Take median blur to counteract blotchy contamination
             dst = cv.medianBlur(self.img, 39)
-            return cv.minMaxLoc(dst)[3]
+            # Remove background larger than central blur to leave just central Gaussian
+            bg = cv.blur(dst, (301, 301))
+            dst_sub = cv.subtract(dst, bg)
+            # Find brightest point on central Gaussian
+            return cv.minMaxLoc(dst_sub)[3]
         
     def get_img(self):
         """Returns the image being analyzed."""
@@ -76,7 +80,8 @@ class CircleFinder:
         try:
             return self.radii 
         except AttributeError:
-            self.radii = argrelmin(self.avg_rem_outliers, order=20)[0]
+            # Typical smallest separation between circles is around 20 pixels
+            self.radii = argrelmin(self.avg_rem_outliers, order=20)[0] 
             return self.radii
     
     def marked_img(self):
@@ -101,6 +106,7 @@ class CircleFinder:
         r = np.sqrt(xdist * xdist + ydist * ydist).astype(np.int32)
 
         r_flat = r.ravel()
+        # Take median blur to counteract blotchy contamination
         img_flat = self.img.ravel().astype(np.int32)
         _, inv, counts = np.unique(r_flat, return_inverse=True, return_counts=True)
         # sum of values per radius
