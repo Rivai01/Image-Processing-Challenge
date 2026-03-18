@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-from scipy.signal import argrelmin
+from scipy.signal import find_peaks
 
 class CircleFinder:
     """Class to find the center and concentric circular rings of images generated 
@@ -25,9 +25,9 @@ class CircleFinder:
         Currently finds the brightest pixel, which is susceptible to noise and contamination, and
         specific to the Metrology Algorithms Challenge images.
         """
-        try:                    # check if the center has already been initialized
+        if 'center' in self.__dict__:       # check if the center has already been initialized
             return self.center
-        except AttributeError:  # initialize the center
+        else:                               # initialize the center
             # Take median blur to counteract blotchy contamination
             dst = cv.medianBlur(self.img, 39)
             # Remove background larger than central blur to leave just central Gaussian
@@ -77,11 +77,16 @@ class CircleFinder:
     
     def get_circles(self):
         """Returns an array containing the radii (in pixels) of the detected circles."""
-        try:
+        if 'radii' in self.__dict__:
             return self.radii 
-        except AttributeError:
-            # Typical smallest separation between circles is around 20 pixels
-            self.radii = argrelmin(self.avg_rem_outliers, order=20)[0] 
+        else:
+            # typical smallest separation between circles is around 20 pixels
+            self.radii, _ = find_peaks(-self.avg_rem_outliers, distance=20, prominence=3)
+            if self.radii[0] < 10: # don't count the center point if it somehow gets detected
+                self.radii = self.radii[1:]
+            while self.radii[-1] > len(self.avg_rem_outliers) - 35: # Too little data to reliably detect at farmost corner
+                self.radii = self.radii[:-1]
+            # self.radii = argrelmin(self.avg_rem_outliers, order=20)[0] 
             return self.radii
     
     def marked_img(self):
@@ -118,7 +123,7 @@ class CircleFinder:
 
         # compute average without outliers (to filter out contamination)
         dev = np.abs(img_flat - avg[inv])
-        mask = dev < 2 * stdev[inv]
+        mask = dev < stdev[inv]
         sum_vals_noout = np.bincount(inv[mask], weights=img_flat[mask], minlength=len(counts))
         counts_noout = np.bincount(inv[mask], minlength=len(counts))
         avg_noout = np.divide(sum_vals_noout, counts_noout, where=counts_noout > 0)

@@ -5,10 +5,11 @@ import time
 import cv2 as cv
 
 if __name__ == "__main__":
-    img, params = generate_image(n_contam=50, noise_mag=100, seed=2976979321)
+    img, params = generate_image(n_contam=5, noise_mag=10)
     print("Seed: ", params.get("seed"))
     start = time.time()
     finder = CircleFinder(img)
+    circles = finder.get_circles()
     end = time.time()
     print(f"Algorithm run time: {end - start:.4f} seconds")
     marked_img = finder.marked_img()
@@ -17,7 +18,7 @@ if __name__ == "__main__":
     ax[0].set_title('Raw image')
     ax[1].imshow(marked_img, cmap='gray')
     ax[1].set_title('Annotated image')
-    ax[2].plot(finder.get_circles(), 'o')
+    ax[2].plot(circles, 'o')
     ax[2].set_title('Circle radii')
     ax[2].set_xlabel('Circle number')
     ax[2].set_ylabel('Radius (pixels)')
