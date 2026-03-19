@@ -31,7 +31,7 @@ To run a noise-free detection on a random seed:
 
     python find_circles.py
 
-To run a detection on seed 1 with 5 contaminations and noise magnitude 10, using noise/contamination mitigation:
+To run a detection on seed 1000 with 5 contaminations and noise magnitude 10, using noise/contamination mitigation:
 
     python find_circles.py --seed 1000 --n-contam 5 --noise-mag 10 --noisy
 
