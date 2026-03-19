@@ -20,7 +20,7 @@ if __name__ == "__main__":
     # time algorithm
     start = time.time()
 
-    finder = CircleFinder(img)
+    finder = CircleFinder(img, noisy=True)
     circles = finder.get_circles()
     coef = finder.quad_regression()
 
@@ -46,6 +46,7 @@ if __name__ == "__main__":
     ax[2].set_title('Circle radii')
     ax[2].set_xlabel('Circle number')
     ax[2].set_ylabel('Radius (pixels)')
+    ax[2].set_ylim(0, 1500)
 
     fig.suptitle('Seed = ' + str(params.get("seed")))
 

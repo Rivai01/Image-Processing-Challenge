@@ -16,7 +16,7 @@ from metalg_challenge_compiled import generate_image  # type: ignore
 from circlefinder import CircleFinder
 
 
-def run_single(n_contam, noise_mag, seed=None, save_path=None, show=True):
+def run_single(n_contam, noise_mag, seed=None, save_path=None, show=True, noisy=False):
     # Generate the image
     img, params = generate_image(
         n_contam=n_contam,
@@ -29,7 +29,7 @@ def run_single(n_contam, noise_mag, seed=None, save_path=None, show=True):
     # Run (and time) the detection code
     start = time.time()
 
-    finder = CircleFinder(img)
+    finder = CircleFinder(img, noisy)
     circles = finder.get_circles()
     coef = finder.quad_regression()
 
@@ -59,6 +59,7 @@ def run_single(n_contam, noise_mag, seed=None, save_path=None, show=True):
     ax[2].set_title('Circle radii')
     ax[2].set_xlabel('Circle number')
     ax[2].set_ylabel('Radius (pixels)')
+    ax[2].set_ylim(0, 1500)
 
     fig.suptitle(f"Seed = {params.get('seed')}")
 
@@ -79,6 +80,7 @@ def run_single(n_contam, noise_mag, seed=None, save_path=None, show=True):
         plt.title('Circle radii')
         plt.xlabel('Circle number')
         plt.ylabel('Radius (pixels)')
+        plt.ylim(0, 1500)
         plt.savefig(save_path.replace(".png", "_regression.png"))
         plt.close()
 
@@ -103,6 +105,8 @@ def main():
                         help="Directory to save output images")
     parser.add_argument("--no-show", action="store_true",
                         help="Disable displaying plots")
+    parser.add_argument("--noisy", action="store_true",
+                        help="Turn on noise and contamination resilience")
 
     args = parser.parse_args()
 
@@ -122,7 +126,8 @@ def main():
             noise_mag=args.noise_mag,
             seed=args.seed,
             save_path=save_path,
-            show=not args.no_show
+            show=not args.no_show,
+            noisy=args.noisy
         )
 
 
